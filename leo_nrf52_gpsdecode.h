@@ -18,8 +18,15 @@ struct leo_mpu9255_config
     float       AccCoefficient;     //加计测量值的转换系数 根据量程不同而不同  量程：8G      对应 4096(LSB/g)
     float       GyrCoefficient;     //陀螺测量值的转换系数 根据量程不同而不同  量程：1000度  对应 32.8(LSB/(度/s))
     float       MagCoefficient;     //磁强计测量值的转换系数     0.6(uT/LSB)
+    float       TemperatureCoefficient;     //温度测量值转换系数
 };
 
+struct leo_ADIS_config
+{
+    float       AccCoefficient;     //加计测量值的转换系数 根据量程不同而不同  量程：8G      对应 1.25(mg/LSB)
+    float       GyrCoefficient;     //陀螺测量值的转换系数 根据量程不同而不同  量程：500度   对应 0.025((度/s)/LSB)
+    float       TempCoefficient;    //温度测量值得转换系数  0.1 摄氏度/LSB
+};
 struct leo_mpu9255
 {
     uint32_t    GpsWeekSeconds;
@@ -27,8 +34,17 @@ struct leo_mpu9255
     float       Acc[3];             // m/s
     float       Gyr[3];             // 弧度/s
     float       Mag[3];             // uT
+    float       Temperature;        //温度 是摄氏度
 };
-
+struct leo_IMU_ADIS
+{
+    uint32_t    GpsWeekSeconds;
+    uint16_t    MicroSeconds;       //每秒内的毫秒计数
+    float       Acc[3];             // m/s
+    float       Gyr[3];             // 弧度/s
+    float       Temp;               // 温度，摄氏度
+    uint16_t    nCounter;           //采样技术值
+};
 
 struct leo_gps
 {
@@ -108,6 +124,8 @@ void UTC2GPS(int year, int month, int day, int hour, int minute, int second, /*i
 void leo_Decode_gps(struct leo_gps* mGPS,uint8_t* mBytes);
 
 void leo_Decode_mpu9255(struct leo_mpu9255* mIMU,struct leo_mpu9255_config mCalibration,uint8_t* mBytes);
+
+void leo_Decode_IMU_ADIS(struct leo_IMU_ADIS *mIMU,struct leo_ADIS_config mConfig, uint8_t *mBytes);
 
 void leo_Decode_footpressure(struct leo_footpressure* mFootPressure,uint8_t* mBytes);
 

@@ -13,7 +13,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     QString mDataPath_Open;
-    QString mDataPath_Save_MAG_Coe;
+    QString mDataPath_Save_MAGA_Coe;
+    QString mDataPath_Save_MAGB_Coe;
     QString mDataPath_Save_IMU_A;
     QString mDataPath_Save_IMU_B;
     QString mDataPath_Save_FootPressure;

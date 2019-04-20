@@ -90,29 +90,39 @@ void leo_Decode_mpu9255(struct leo_mpu9255 *mIMU,struct leo_mpu9255_config mCali
     if(AccY & 0x8000) AccY-=65536;
     AccZ = (*(mBytes+10) << 8) | *(mBytes+11);
     if(AccZ & 0x8000) AccZ-=65536;
+    mIMU->Acc[0] = ((float)AccX) / mCalibration.AccCoefficient * g;
+    mIMU->Acc[1] = ((float)AccY) / mCalibration.AccCoefficient * g;
+    mIMU->Acc[2] = ((float)AccZ) / mCalibration.AccCoefficient * g;
 
-    mIMU->Acc[0] = ((float)AccX) / ((float)mCalibration.AccCoefficient) * g;
-    mIMU->Acc[1] = ((float)AccY) / ((float)mCalibration.AccCoefficient) * g;
-    mIMU->Acc[2] = ((float)AccZ) / ((float)mCalibration.AccCoefficient) * g;
+    int16_t Temperature;
+    Temperature = (*(mBytes+12) << 8) | *(mBytes+13);
+    mIMU->Temperature = ((float)Temperature) / mCalibration.TemperatureCoefficient + 21.0;
 
     int16_t GyrX,GyrY,GyrZ;
-    GyrX = (*(mBytes+12) << 8) | *(mBytes+13);
+    GyrX = (*(mBytes+14) << 8) | *(mBytes+15);
     if(GyrX & 0x8000) GyrX-=65536;
-    GyrY= (*(mBytes+14) << 8) | *(mBytes+15);
+    GyrY= (*(mBytes+16) << 8) | *(mBytes+17);
     if(GyrY & 0x8000) GyrY-=65536;
-    GyrZ = (*(mBytes+16) << 8) | *(mBytes+17);
+    GyrZ = (*(mBytes+18) << 8) | *(mBytes+19);
     if(GyrZ & 0x8000) GyrZ-=65536;
-    mIMU->Gyr[0] = ((float)GyrX) / ((float)mCalibration.GyrCoefficient) * Du2Hu;
-    mIMU->Gyr[1] = ((float)GyrY) / ((float)mCalibration.GyrCoefficient) * Du2Hu;
-    mIMU->Gyr[2] = ((float)GyrZ) / ((float)mCalibration.GyrCoefficient) * Du2Hu;
+    mIMU->Gyr[0] = ((float)GyrX) / ((float)mCalibration.GyrCoefficient) ;
+    mIMU->Gyr[1] = ((float)GyrY) / ((float)mCalibration.GyrCoefficient) ;
+    mIMU->Gyr[2] = ((float)GyrZ) / ((float)mCalibration.GyrCoefficient) ;
 
     int16_t MagX,MagY,MagZ;
-    MagX = (*(mBytes+18) << 8) | *(mBytes+19);
+    MagX = (*(mBytes+22) << 8) | *(mBytes+21);
     if(MagX & 0x8000) MagX-=65536;
-    MagY= (*(mBytes+20) << 8) | *(mBytes+21);
+    MagY= (*(mBytes+24) << 8) | *(mBytes+23);
     if(MagY & 0x8000) MagY-=65536;
-    MagZ = (*(mBytes+22) << 8) | *(mBytes+23);
+    MagZ = (*(mBytes+26) << 8) | *(mBytes+25);
     if(MagZ & 0x8000) MagZ-=65536;
+//    int16_t MagX,MagY,MagZ;
+//    MagX = (*(mBytes+18) << 8) | *(mBytes+19);
+//    if(MagX & 0x8000) MagX-=65536;
+//    MagY= (*(mBytes+20) << 8) | *(mBytes+21);
+//    if(MagY & 0x8000) MagY-=65536;
+//    MagZ = (*(mBytes+22) << 8) | *(mBytes+23);
+//    if(MagZ & 0x8000) MagZ-=65536;
     MagX = MagX * (((float)mCalibration.MagASAXYZ[0]-128.0)*0.5/128.0+1);
     MagY = MagY * (((float)mCalibration.MagASAXYZ[1]-128.0)*0.5/128.0+1);
     MagZ = MagZ * (((float)mCalibration.MagASAXYZ[2]-128.0)*0.5/128.0+1);
@@ -120,6 +130,44 @@ void leo_Decode_mpu9255(struct leo_mpu9255 *mIMU,struct leo_mpu9255_config mCali
     mIMU->Mag[0] = ((float)MagX) * ((float)mCalibration.MagCoefficient);
     mIMU->Mag[1] = ((float)MagY) * ((float)mCalibration.MagCoefficient);
     mIMU->Mag[2] = ((float)MagZ) * ((float)mCalibration.MagCoefficient);
+
+    return;
+}
+
+
+void leo_Decode_IMU_ADIS(struct leo_IMU_ADIS *mIMU,struct leo_ADIS_config mConfig, uint8_t *mBytes)
+{
+    memcpy(&(mIMU->GpsWeekSeconds),mBytes,4);
+    memcpy(&(mIMU->MicroSeconds),mBytes+4,2);
+
+    int16_t GyrX,GyrY,GyrZ;
+    GyrX = (*(mBytes+6) << 8) | *(mBytes+7);
+    if(GyrX & 0x8000) GyrX-=65536;
+    GyrY= (*(mBytes+8) << 8) | *(mBytes+9);
+    if(GyrY & 0x8000) GyrY-=65536;
+    GyrZ = (*(mBytes+10) << 8) | *(mBytes+11);
+    if(GyrZ & 0x8000) GyrZ-=65536;
+    mIMU->Gyr[0] = ((float)GyrX) * ((float)mConfig.GyrCoefficient) ;
+    mIMU->Gyr[1] = ((float)GyrY) * ((float)mConfig.GyrCoefficient) ;
+    mIMU->Gyr[2] = ((float)GyrZ) * ((float)mConfig.GyrCoefficient) ;
+
+    int16_t AccX,AccY,AccZ;
+    AccX = (*(mBytes+12) << 8) | *(mBytes+13);
+    if(AccX & 0x8000) AccX-=65536;
+    AccY = (*(mBytes+14) << 8) | *(mBytes+15);
+    if(AccY & 0x8000) AccY-=65536;
+    AccZ = (*(mBytes+16) << 8) | *(mBytes+17);
+    if(AccZ & 0x8000) AccZ-=65536;
+
+    mIMU->Acc[0] = ((float)AccX) * ((float)mConfig.AccCoefficient) * g/1000.0;
+    mIMU->Acc[1] = ((float)AccY) * ((float)mConfig.AccCoefficient) * g/1000.0;
+    mIMU->Acc[2] = ((float)AccZ) * ((float)mConfig.AccCoefficient) * g/1000.0;
+
+    int16_t Temperature;
+    Temperature = (*(mBytes+18) << 8) | *(mBytes+19);
+    mIMU->Temp = ((float)Temperature) * mConfig.TempCoefficient;
+
+    mIMU->nCounter = (*(mBytes+20) << 8) | *(mBytes+21);
 
     return;
 }
