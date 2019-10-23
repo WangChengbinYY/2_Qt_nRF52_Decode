@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-#define g 9.7803267714                       //后面可以改进通过 纬度求解当地 重力加速度g的数值
+#define g 9.8                       //后面可以改进通过 纬度求解当地 重力加速度g的数值
 #define pi 3.1415926
 #define Du2Hu pi/180
 
